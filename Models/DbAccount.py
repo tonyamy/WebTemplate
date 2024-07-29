@@ -1,10 +1,13 @@
-from typing import Type, TypeVar, Optional, Generic
+from typing import List, Tuple
+from typing import Type
 
-import sqlalchemy.orm.decl_api
 from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import desc, asc
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import scoped_session
 
 from Service.Engine import session_scope
+from Utils.Utils import auto_convert_to_dict
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -21,23 +24,8 @@ class DbAccount(Base):
     register_time = Column(DateTime)
 
 
-T = TypeVar('T', bound=Base)
 
-
-class ModelCrud(Generic[T]):
-
-    def __init__(self, Session: Type[sqlalchemy.orm.scoping.scoped_session],
-                 Model: Type[T]):
-        # T = TypeVar('T', bound=Model)
-        a = list[a]
-        self.session = Session
-        self.Model = Model
-
-    def getById(self, Id: int) -> Optional[T]:
-        return self.session.query(self.Model).filter_by(id=Id).first()
-
-
-with session_scope() as session:
-    a = ModelCrud(session, DbAccount)
-
-# T = TypeVar('T', bound=DbAccount)
+# with session_scope() as session:
+#     data, total = ModelCrud(session, DbAccount).paginate_query(filters=None, page=20)
+#     # print(data)
+#     print(total)
