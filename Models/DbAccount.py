@@ -1,19 +1,13 @@
-from typing import List, Tuple
-from typing import Type
-
 from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy import desc, asc
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session
 
-from Service.Engine import session_scope
-from Utils.Utils import auto_convert_to_dict
+from sqlalchemy_serializer import SerializerMixin
 
 Base = declarative_base()
 metadata = Base.metadata
 
 
-class DbAccount(Base):
+class DbAccount(Base, SerializerMixin):
     __tablename__ = 'db_account'
 
     id = Column(Integer, primary_key=True)
@@ -22,8 +16,6 @@ class DbAccount(Base):
     email = Column(String(255))
     role = Column(String(255))
     register_time = Column(DateTime)
-
-
 
 # with session_scope() as session:
 #     data, total = ModelCrud(session, DbAccount).paginate_query(filters=None, page=20)

@@ -1,10 +1,7 @@
-from typing import List, Type, Dict
+from typing import List, Type, Dict, Any
 
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import scoped_session
-
-from Models.DbAccount import Base
-from Utils.Utils import auto_convert_to_dict
 
 
 class ModelCrud:
@@ -12,17 +9,6 @@ class ModelCrud:
         self.session = Session
         self.Model = Model
 
-    @auto_convert_to_dict
-    def getById(self, modelId: int, id: int, ):  # 使用泛型 T 来指定返回值类型
-        return self.session.query(self.Model).filter_by(modelId == id).first()
-
-    def insert(self, model):
-        return self.session.add(model)
-
-    def delById(self, modelId: int, id: int):
-        return self.session.query(self.Model).filter_by(modelId == id).delete()
-
-    @auto_convert_to_dict
     def paginate_query(
             self,
             filters=None,
@@ -30,7 +16,7 @@ class ModelCrud:
             page_size: int = 10,
             sort_by: str = None,
             sort_order: str = 'asc'
-    ) -> Dict[List[Base], int]:
+    ) -> Dict[List[any], int]:
         """
         分页查询函数
         :param filters: 查询条件列表
@@ -66,3 +52,49 @@ class ModelCrud:
         results = query.all()
 
         return results, total_count
+
+    def create(self, data: Dict[str, Any]) -> Any:
+        """
+        创建新记录
+        :param data: 数据字典
+        :return: 创建的记录
+        """
+        instance = self.Model(**data)
+        self.session.add(instance=instance)
+        self.session.commit()
+        return instance
+
+    def read(self, record_id: Any) -> Any:
+        """
+        读取单个记录
+        :param record_id: 记录ID
+        :return: 查询的记录
+        """
+        return self.session.query(self.Model).get(record_id)
+
+    def update(self, record_id: Any, data: Dict[str, Any]) -> Any:
+        """
+        更新记录
+        :param record_id: 记录ID
+        :param data: 更新的数据字典
+        :return: 更新的记录
+        """
+        instance = self.session.query(self.Model).get(record_id)
+        if instance:
+            for key, value in data.items():
+                setattr(instance, key, value)
+            self.session.commit()
+        return instance
+
+    def delete(self, record_id: Any) -> bool:
+        """
+        删除记录
+        :param record_id: 记录ID
+        :return: 是否成功删除
+        """
+        instance = self.session.query(self.Model).get(record_id)
+        if instance:
+            self.session.delete(instance)
+            self.session.commit()
+            return True
+        return False
