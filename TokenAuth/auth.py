@@ -40,12 +40,16 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt, expire
 
 
-def verify_token(token: str, credentials_exception):
+def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            raise credentials_exception
+            return None
     except JWTError:
-        raise credentials_exception
+        return None
     return payload
+
+
+print(verify_token(
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTcyMjQ0ODAzNn0.WLjmM2W5zeyg4kR3jVB_F9gq1mXV5Fi9Tj17-3QLGYs'))

@@ -3,6 +3,8 @@ import traceback
 from functools import wraps
 from typing import Any, Callable, Union, List, Dict
 
+from fastapi.responses import JSONResponse
+
 
 def to_dict(result: Any) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
     if isinstance(result, list):
@@ -60,3 +62,10 @@ def log_exceptions(func):
             raise
 
     return wrapper
+
+
+async def custom_http_exception_handler(status_code, content):
+    return JSONResponse(
+        status_code=status_code,
+        content=content,
+    )
