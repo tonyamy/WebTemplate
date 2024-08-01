@@ -43,13 +43,12 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
 def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(payload)
         username: str = payload.get("sub")
         if username is None:
+            print('1')
             return None
-    except JWTError:
+    except JWTError as e:
+        print(e)
         return None
     return payload
-
-
-print(verify_token(
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTcyMjQ0ODAzNn0.WLjmM2W5zeyg4kR3jVB_F9gq1mXV5Fi9Tj17-3QLGYs'))
