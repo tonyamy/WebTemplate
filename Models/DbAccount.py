@@ -1,23 +1,33 @@
-from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+from typing import Optional
 
-from sqlalchemy_serializer import SerializerMixin
+from sqlmodel import Field, SQLModel, Session, select
 
-Base = declarative_base()
-metadata = Base.metadata
+from Service.Engine import engine
+
+SQLModel.metadata.create_all(engine)
 
 
-class DbAccount(Base, SerializerMixin):
+class DbAccount(SQLModel, table=True):
     __tablename__ = 'db_account'
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str
+    password: str
+    email: str
+    role: str
+    register_time: datetime
 
-    id = Column(Integer, primary_key=True)
-    username = Column(String(255))
-    password = Column(String(255))
-    email = Column(String(255))
-    role = Column(String(255))
-    register_time = Column(DateTime)
 
-# with session_scope() as session:
-#     data, total = ModelCrud(session, DbAccount).paginate_query(filters=None, page=20)
-#     # print(data)
-#     print(total)
+def aaa(page, size, filters=None):
+    with Session(engine) as session:
+
+        s = select(DbAccount).offset((page - 1) * size).limit(size)
+        print(s)
+        result = session.exec(s).all()
+
+        print(len(result))
+        print(result)
+    return result
+
+
+print(aaa(1, 10))

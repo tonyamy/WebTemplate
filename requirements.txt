@@ -4,11 +4,12 @@ pydantic==2.7.0
 python-dotenv==1.0.1
 python_jose==3.3.0
 redis==5.0.3
-SQLAlchemy==1.4.52
-starlette~=0.36.3
+SQLAlchemy~=2.0.29
+starlette~=0.37.2
 uvicorn==0.29.0
 PyMySQL==1.1.0
 sqlacodegen==2.3.0.post1
 pyjwt==2.8.0
 passlib==1.7.4
 SQLAlchemy-Serializer==1.4.22
+sqlmodel~=0.0.21

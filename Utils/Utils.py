@@ -1,50 +1,39 @@
 import functools
 import traceback
-from functools import wraps
-from typing import Any, Callable, Union, List, Dict
+from datetime import datetime
 
 from fastapi.responses import JSONResponse
+from sqlalchemy.inspection import inspect
 
 
-def to_dict(result: Any) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
-    if isinstance(result, list):
-        return [item.__dict__ for item in result if hasattr(item, '__dict__')]
-    elif hasattr(result, '__dict__'):
-        return result.__dict__
-    return result
+def to_dict(obj, formatStr='%Y-%m-%d %H:%M:%S'):
+    """
+    将 SQLAlchemy 对象或对象列表转换为字典，并格式化日期时间字段。
+    """
+    if obj is None:
+        return None
 
+    # 如果是列表，则递归调用 to_dict
+    if isinstance(obj, list):
+        return [to_dict(item) for item in obj]
 
-def auto_convert_to_dict(func: Callable) -> Callable:
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
+    # 确保 obj 是 SQLAlchemy 的模型实例
+    if hasattr(obj, '__table__'):
+        result = {}
+        mapper = inspect(obj)
 
-        if isinstance(result, tuple) and len(result) == 2:
-            results, total_count = result
-            results = to_dict(results)
+        for column in mapper.mapper.column_attrs:
+            value = getattr(obj, column.key)
+            if isinstance(value, datetime):
+                # 格式化日期时间字段
+                result[column.key] = value.strftime(formatStr)
+            else:
+                result[column.key] = value
 
-            # 移除 SQLAlchemy 特殊属性
-            if isinstance(results, list):
-                for item in results:
-                    item.pop('_sa_instance_state', None)
-            elif isinstance(results, dict):
-                results.pop('_sa_instance_state', None)
+        return result
 
-            return results, total_count
-
-        else:
-            result = to_dict(result)
-
-            # 移除 SQLAlchemy 特殊属性
-            if isinstance(result, list):
-                for item in result:
-                    item.pop('_sa_instance_state', None)
-            elif isinstance(result, dict):
-                result.pop('_sa_instance_state', None)
-
-            return result
-
-    return wrapper
+    # 如果不是模型实例或列表，则直接返回其自身
+    return obj
 
 
 def log_exceptions(func):
